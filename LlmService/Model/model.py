@@ -5,13 +5,18 @@ from fastapi import APIRouter
 router = APIRouter()
 
 
-def load_model():
+def load_model(
+        task: str,
+        model: str,
+        torch_dtype: torch.dtype,
+        device_map: str
+):
     print("\n====> [INFO] in function: load_model() <====\n")
     return pipeline(
-        "text-generation",
-        model="/home/qm/TinyLlama-1.1B-Chat-v1.0",
-        torch_dtype=torch.bfloat16,
-        device_map="auto"
+        task=task,
+        model=model,
+        torch_dtype=torch_dtype,
+        device_map=device_map
     )
 
 

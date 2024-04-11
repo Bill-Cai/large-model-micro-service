@@ -1,3 +1,4 @@
+import torch
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from LlmService.Model.model import load_model
@@ -10,7 +11,12 @@ pipe = None
 async def lifespan(app: FastAPI):
     print("\n====> [INFO] lifespan start <====\n")
     global pipe
-    pipe = load_model()  # load large model
+    pipe = load_model(
+        task="text-generation",
+        model="/home/qm/TinyLlama-1.1B-Chat-v1.0",
+        torch_dtype=torch.bfloat16,
+        device_map="auto"
+    )  # load large model
     print("\n====> [INFO] model loaded <====\n")
     yield
     print("\n====> [INFO] lifespan shutdown <====\n")
