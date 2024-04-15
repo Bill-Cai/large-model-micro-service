@@ -1,6 +1,7 @@
 import torch
 from transformers import pipeline
 from fastapi import APIRouter
+from LlmService.util import stream_out
 
 router = APIRouter()
 
@@ -9,9 +10,10 @@ def load_model(
         task: str,
         model: str,
         torch_dtype: torch.dtype,
-        device_map: str
+        device_map: str,
+        verbose: bool = False
 ):
-    print("\n====> [INFO] in function: load_model() <====\n")
+    stream_out("\n====> [INFO] in function: load_model() <====\n", verbose=verbose)
     return pipeline(
         task=task,
         model=model,

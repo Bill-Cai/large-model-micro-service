@@ -3,23 +3,27 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from LlmService.Model.model import load_model
 from LlmService.router.chat import router as chat_router
+from LlmService.util import stream_out
 
 pipe = None
+verbose = True
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("\n====> [INFO] lifespan start <====\n")
+    stream_out("\n====> [INFO] lifespan start <====\n", verbose=verbose)
     global pipe
     pipe = load_model(
         task="text-generation",
         model="/home/qm/TinyLlama-1.1B-Chat-v1.0",
         torch_dtype=torch.bfloat16,
-        device_map="auto"
+        device_map="auto",
+        verbose=verbose
     )  # load large model
-    print("\n====> [INFO] model loaded <====\n")
+    stream_out("\n====> [INFO] model loaded <====\n", verbose=verbose)
+    print()
     yield
-    print("\n====> [INFO] lifespan shutdown <====\n")
+    stream_out("\n====> [INFO] lifespan shutdown <====\n", verbose=verbose)
 
 
 app = FastAPI(lifespan=lifespan)
@@ -28,5 +32,5 @@ app.mount("/chat", chat_router)
 
 @app.get("/test")
 async def test():
-    print(pipe)
+    stream_out(pipe, verbose=True)
     return {"message": "success", "router": "/test"}
