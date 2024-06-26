@@ -35,7 +35,7 @@ def load_model(
             load_in_4bit=True,
             bnb_4bit_use_double_quant=True,
             bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.bfloat16
+            bnb_4bit_compute_dtype=torch_dtype
         )
         # load model
         _model = AutoModelForCausalLM.from_pretrained(
@@ -57,6 +57,27 @@ def load_model(
         return {
             "model": AutoModelForCausalLM.from_pretrained(model, device_map="auto"),
             "tokenizer": AutoTokenizer.from_pretrained(model)
+        }
+    elif model_id == "Meta-Llama-3-8B-Instruct":
+        stream_out(f"\n====> [INFO] load model: {model_id} <====\n", verbose=verbose)
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch_dtype
+        )
+        _model = AutoModelForCausalLM.from_pretrained(
+            model,
+            quantization_config=bnb_config,
+            use_cache=True,
+            device_map=device_map
+        )
+        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        tokenizer.pad_token = tokenizer.eos_token
+        tokenizer.padding_side = "right"
+        return {
+            "model": _model,
+            "tokenizer": tokenizer
         }
     else:
         pass

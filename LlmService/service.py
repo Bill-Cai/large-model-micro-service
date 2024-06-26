@@ -10,6 +10,7 @@ pipe_list = {}
 TINYLLAMA_MODEL_PATH = "/data/qm/huggingface/TinyLlama-1.1B-Chat-v1.0"
 LLAMA2_MODEL_PATH = "/data/qm/huggingface/Llama-2-7b-chat-hf"
 MISTRAL_MODEL_PATH = "/data/qm/huggingface/Mistral-7B-Instruct-v0.2/Mistral-7B-Instruct-v0.2"
+LLAMA3_MODEL_PATH = "/data/qm/huggingface/Meta-Llama-3-8B-Instruct"
 
 
 @asynccontextmanager
@@ -28,12 +29,20 @@ async def lifespan(app: FastAPI):
         model=LLAMA2_MODEL_PATH,
         model_id="Llama-2-7b-chat-hf",
         device_map="auto",
+        torch_dtype=torch.bfloat16,
         verbose=verbose
     )
     pipe_list["Mistral-7B-Instruct-v0.2"] = load_model(
         model=MISTRAL_MODEL_PATH,
         model_id="Mistral-7B-Instruct-v0.2",
         device_map="auto",
+        verbose=verbose
+    )
+    pipe_list["Meta-Llama-3-8B-Instruct"] = load_model(
+        model=LLAMA3_MODEL_PATH,
+        model_id="Meta-Llama-3-8B-Instruct",
+        device_map="auto",
+        torch_dtype=torch.bfloat16,
         verbose=verbose
     )
     stream_out("\n====> [INFO] model loaded <====\n", verbose=verbose)

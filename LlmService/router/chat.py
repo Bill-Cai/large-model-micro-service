@@ -212,3 +212,51 @@ def chat_completion_mistral(
         },
         "outputs": result[0]
     }
+
+@router.post("/llama3/chat_completion")
+def chat_completion_llama3(
+        messages: List[Message],
+        max_new_tokens: int = 512,
+        do_sample: bool = True,
+        temperature: float = 0.7,
+        top_k: int = 50,
+        top_p: float = 0.95
+):
+    from LlmService.service import pipe_list, verbose
+    global pipe_list
+    stream_out("\n====> [INFO] call function: chat_completion_llama3() <====\n", verbose=verbose)
+    stream_out("\n====> [INFO] input messages <====\n", verbose=verbose)
+    stream_out(messages, verbose=verbose)
+    model = pipe_list["Meta-Llama-3-8B-Instruct"]["model"]
+    tokenizer = pipe_list["Meta-Llama-3-8B-Instruct"]["tokenizer"]
+    if model.device.type == "cuda":
+        model_inputs = tokenizer.apply_chat_template(messages, return_tensors="pt").to(
+            "cuda")
+    elif model.device.type == "cpu":
+        model_inputs = tokenizer.apply_chat_template(messages, return_tensors="pt")
+    else:
+        return {
+            "message": "failed",
+            "info": {
+                "error": "[ERROR] Custom error: model.device.type"
+            }
+        }
+    generated_ids = model.generate(model_inputs, max_new_tokens=max_new_tokens, do_sample=do_sample,
+                                   temperature=temperature, top_k=top_k,
+                                   top_p=top_p)
+    result = tokenizer.batch_decode(generated_ids)
+    stream_out("\n====> [INFO] llm outputs <====\n", verbose=verbose)
+    stream_out(result, verbose=verbose)
+    return {
+        "message": "success",
+        "router": "/chat/mistral/chat_completion",
+        "params": {
+            "messages": messages,
+            "max_new_tokens": max_new_tokens,
+            "do_sample": do_sample,
+            "temperature": temperature,
+            "top_k": top_k,
+            "top_p": top_p
+        },
+        "outputs": result[0]
+    }
