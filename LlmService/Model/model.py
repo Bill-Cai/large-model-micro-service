@@ -72,7 +72,7 @@ def load_model(
             use_cache=True,
             device_map=device_map
         )
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        tokenizer = AutoTokenizer.from_pretrained(model)
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.padding_side = "right"
         return {
